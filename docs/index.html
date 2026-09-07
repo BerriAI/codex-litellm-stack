@@ -7,8 +7,7 @@
 <style>
 /* The palette is litellm.ai's own: the #F3F3F3 ground, #272B37 ink, #D3D3D5
    card rules, the #5B3FD1 accent and the #E6E6FF tint it fills, set in Geist
-   and Geist Mono. Terminal wells take #0C0A32, the navy the site uses for its
-   dark strips. */
+   and Geist Mono. Every surface is light, code panels included. */
 
 :root {
   --ground:   #F3F3F3;
@@ -24,7 +23,6 @@
   --accent-soft: #E6E6FF;
   --ok:       #0F8B72;
   --bad:      #C0392B;
-  --well:     #0C0A32;
   --shadow:   0 10px 30px rgba(12, 10, 50, 0.10);
   --btn1-ink: #FFFFFF;
   --btn2:     linear-gradient(#FFFFFF, #F7F7F9);
@@ -34,16 +32,13 @@
   --body:    "Geist", -apple-system, "Helvetica Neue", Arial, sans-serif;
   --mono:    "Geist Mono", ui-monospace, "SF Mono", SFMono-Regular, Menlo, monospace;
 
-  /* Constant across themes: the wells are always the LiteLLM navy. */
-  --well-ink:  #E6E5F4;
-  --well-dim:  #9C99C6;
-  --well-cm:   #7A77A6;
-  --well-rule: #262255;
-  --well-key:  #C3C0FF;
-  --well-str:  #8FE6B0;
-  --well-num:  #7FD9F5;
-  --well-ok:   #8FE6B0;
-  --well-bad:  #FF9E8A;
+  /* Code surfaces are light too: white cards, purple identifiers, green output. */
+  --code-key: #5B3FD1;
+  --code-str: #0F8B72;
+  --code-num: #0E7490;
+  --code-cm:  rgba(39, 43, 55, 0.50);
+  --code-dim: rgba(39, 43, 55, 0.55);
+  --pill-ok:  #E7F6F1;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -61,11 +56,16 @@
     --accent-soft: #241F55;
     --ok:       #25C2A0;
     --bad:      #FF9E8A;
-    --well:     #05041A;
     --shadow:   0 10px 30px rgba(0, 0, 0, 0.35);
     --btn1-ink: #0C0A32;
     --btn2:     linear-gradient(#161240, #110E36);
     --dots:     radial-gradient(rgba(233, 232, 245, 0.14) 1px, rgba(0, 0, 0, 0) 1.2px);
+    --code-key: #C3C0FF;
+    --code-str: #8FE6B0;
+    --code-num: #7FD9F5;
+    --code-cm:  rgba(233, 232, 245, 0.45);
+    --code-dim: rgba(233, 232, 245, 0.55);
+    --pill-ok:  #12352C;
   }
 }
 
@@ -83,11 +83,16 @@
   --accent-soft: #241F55;
   --ok:       #25C2A0;
   --bad:      #FF9E8A;
-  --well:     #05041A;
   --shadow:   0 10px 30px rgba(0, 0, 0, 0.35);
   --btn1-ink: #0C0A32;
   --btn2:     linear-gradient(#161240, #110E36);
   --dots:     radial-gradient(rgba(233, 232, 245, 0.14) 1px, rgba(0, 0, 0, 0) 1.2px);
+  --code-key: #C3C0FF;
+  --code-str: #8FE6B0;
+  --code-num: #7FD9F5;
+  --code-cm:  rgba(233, 232, 245, 0.45);
+  --code-dim: rgba(233, 232, 245, 0.55);
+  --pill-ok:  #12352C;
 }
 
 * { box-sizing: border-box; }
@@ -102,12 +107,12 @@ body {
 }
 
 .page {
-  max-width: 1000px;
+  max-width: 960px;
   margin: 0 auto;
   padding: 56px 28px 96px;
   display: flex;
   flex-direction: column;
-  gap: 64px;
+  gap: 56px;
 }
 
 /* ---------- masthead ---------- */
@@ -149,21 +154,49 @@ h1 {
   text-wrap: pretty;
 }
 
+.checks {
+  list-style: none;
+  margin: 2px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+  max-width: 62ch;
+}
+.checks li { position: relative; padding-left: 34px; line-height: 1.55; color: var(--muted); }
+.checks li b { color: var(--ink); font-weight: 600; }
+.checks li::before {
+  content: "\2713";
+  position: absolute;
+  left: 0;
+  top: 2px;
+  width: 21px;
+  height: 21px;
+  border-radius: 7px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 21px;
+  text-align: center;
+}
+
 .install {
-  background: var(--well);
-  color: var(--well-ink);
+  background: var(--panel);
+  color: var(--ink);
   font-family: var(--mono);
   font-size: 13.5px;
   line-height: 1.85;
   padding: 20px 22px;
-  border: 1px solid var(--well-rule);
-  border-radius: 12px;
+  border: 1px solid var(--rule);
+  border-radius: 14px;
+  box-shadow: var(--shadow);
   overflow-x: auto;
   white-space: pre;
   margin-top: 2px;
 }
-.install .p { color: var(--well-cm); user-select: none; }
-.install .c { color: var(--well-key); }
+.install .p { color: var(--code-dim); user-select: none; }
+.install .c { color: var(--code-key); font-weight: 500; }
 
 .runline {
   font-family: var(--mono);
@@ -192,47 +225,38 @@ h1 {
 }
 .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 
-/* ---------- section rail ---------- */
+/* ---------- sections ---------- */
 
 .sec {
-  display: grid;
-  grid-template-columns: 176px minmax(0, 1fr);
-  gap: 32px;
-  align-items: start;
   border-top: 1px solid var(--rule);
-  padding-top: 30px;
+  padding-top: 38px;
 }
 
-.sec > .rail {
-  font-family: var(--mono);
-  font-size: 11px;
-  font-weight: 500;
-  color: var(--accent);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  position: sticky;
-  top: 24px;
-}
-.rail span {
-  display: block;
-  color: var(--dim);
-  font-weight: 400;
-  letter-spacing: 0.02em;
-  text-transform: none;
-  margin-top: 8px;
-  line-height: 1.6;
-}
+.sec > .body { display: flex; flex-direction: column; gap: 22px; min-width: 0; }
 
-.sec > .body { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+.lockup { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 14px; }
 
 h2 {
   font-family: var(--display);
   font-weight: 500;
-  font-size: clamp(23px, 3vw, 31px);
-  letter-spacing: -0.014em;
-  line-height: 1.2;
+  font-size: clamp(24px, 3.2vw, 33px);
+  letter-spacing: -0.016em;
+  line-height: 1.22;
   margin: 0;
   text-wrap: balance;
+  max-width: 26ch;
+}
+h2 .k { color: var(--accent); }
+
+.chip {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--dim);
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  padding: 5px 12px;
+  white-space: nowrap;
 }
 
 .sec p { margin: 0; max-width: 68ch; text-wrap: pretty; }
@@ -286,13 +310,14 @@ tbody tr:last-child td { border-bottom: 0; }
 td.key { color: var(--accent); font-weight: 500; }
 td.dim { color: var(--muted); }
 
-/* ---------- code well: the Codex terminal, on either theme ---------- */
+/* ---------- code panels ---------- */
 
 .well {
-  background: var(--well);
-  color: var(--well-ink);
-  border: 1px solid var(--well-rule);
-  border-radius: 12px;
+  background: var(--panel);
+  color: var(--ink);
+  border: 1px solid var(--rule);
+  border-radius: 14px;
+  box-shadow: var(--shadow);
   overflow: hidden;
 }
 .well .cap {
@@ -300,9 +325,10 @@ td.dim { color: var(--muted); }
   font-size: 11px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--well-dim);
+  color: var(--dim);
+  background: var(--panel-2);
   padding: 12px 22px;
-  border-bottom: 1px solid var(--well-rule);
+  border-bottom: 1px solid var(--hair);
 }
 .well pre {
   margin: 0;
@@ -312,19 +338,27 @@ td.dim { color: var(--muted); }
   font-size: 13px;
   line-height: 1.72;
 }
-.well .k   { color: var(--well-key); }
-.well .s   { color: var(--well-str); }
-.well .n   { color: var(--well-num); }
-.well .cm  { color: var(--well-cm); }
-.well .tbl { color: #FFFFFF; font-weight: 700; }
-.well .ok  { color: var(--well-ok); }
-.well .bad { color: var(--well-bad); }
-.well .lbl { color: var(--well-dim); }
+.well .k   { color: var(--code-key); }
+.well .s   { color: var(--code-str); }
+.well .n   { color: var(--code-num); }
+.well .cm  { color: var(--code-cm); }
+.well .tbl { color: var(--ink); font-weight: 700; }
+.well .ok  {
+  display: inline-block;
+  background: var(--pill-ok);
+  color: var(--ok);
+  border-radius: 999px;
+  padding: 0 9px;
+  font-size: 11.5px;
+  font-weight: 600;
+}
+.well .bad { color: var(--bad); font-weight: 500; }
+.well .lbl { color: var(--dim); }
 .well pre.prompt {
   /* The source keeps its line breaks for the clipboard; on screen it reflows,
      so the column stays ragged-right instead of breaking mid-thought. */
   white-space: normal;
-  color: var(--well-ink);
+  color: var(--ink);
   font-family: var(--body);
   font-size: 15.5px;
   line-height: 1.65;
@@ -343,22 +377,22 @@ td.dim { color: var(--muted); }
   font-size: 11px;
   letter-spacing: 0.09em;
   text-transform: uppercase;
-  color: var(--well-dim);
-  background: transparent;
-  border: 1px solid var(--well-rule);
-  border-radius: 4px;
+  color: var(--muted);
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: 7px;
   padding: 5px 12px;
   cursor: pointer;
   transition: color 0.14s ease, border-color 0.14s ease;
 }
-.copy:hover { color: var(--well-key); border-color: var(--well-key); }
-.copy:focus-visible { outline: 2px solid var(--well-key); outline-offset: 2px; }
-.copy[data-state="done"] { color: var(--well-ok); border-color: var(--well-ok); }
-.copy[data-state="fail"] { color: var(--well-bad); border-color: var(--well-bad); }
+.copy:hover { color: var(--accent); border-color: var(--accent); }
+.copy:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.copy[data-state="done"] { color: var(--ok); border-color: var(--ok); }
+.copy[data-state="fail"] { color: var(--bad); border-color: var(--bad); }
 .well pre.prompt code {
   font-family: var(--mono);
   font-size: 0.85em;
-  color: var(--well-key);
+  color: var(--code-key);
   background: none;
   border: 0;
   padding: 0;
@@ -367,25 +401,32 @@ td.dim { color: var(--muted); }
 /* ---------- tabs ---------- */
 
 .tabs {
-  display: flex;
-  gap: 30px;
-  border-bottom: 1px solid var(--rule);
+  display: inline-flex;
+  align-self: flex-start;
+  gap: 4px;
+  background: var(--panel-2);
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  padding: 5px;
 }
 .tab {
-  font-family: var(--mono);
-  font-size: 12.5px;
-  letter-spacing: 0.04em;
+  font-family: var(--body);
+  font-size: 14px;
+  font-weight: 500;
   color: var(--muted);
   background: none;
   border: 0;
-  border-bottom: 2px solid transparent;
-  margin-bottom: -1px;
-  padding: 0 1px 11px;
+  border-radius: 9px;
+  padding: 9px 16px;
   cursor: pointer;
 }
 .tab:hover { color: var(--ink); }
-.tab[aria-selected="true"] { color: var(--accent); border-bottom-color: var(--accent); }
-.tab:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+.tab[aria-selected="true"] {
+  background: var(--panel);
+  color: var(--accent);
+  box-shadow: 0 1px 2px rgba(12, 10, 50, 0.12);
+}
+.tab:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 .pane { display: flex; flex-direction: column; gap: 20px; }
 .pane[hidden] { display: none; }
@@ -404,19 +445,26 @@ td.dim { color: var(--muted); }
 .steps > li {
   counter-increment: step;
   position: relative;
-  padding-left: 32px;
+  padding-left: 38px;
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 .steps > li::before {
-  content: counter(step) ".";
+  content: counter(step);
   position: absolute;
   left: 0;
-  top: 3px;
-  font-family: var(--mono);
-  font-size: 13px;
+  top: 1px;
+  width: 23px;
+  height: 23px;
+  border-radius: 7px;
+  background: var(--accent-soft);
   color: var(--accent);
+  font-family: var(--mono);
+  font-size: 12.5px;
+  font-weight: 700;
+  line-height: 23px;
+  text-align: center;
 }
 .steps h3 {
   font-family: var(--display);
@@ -429,20 +477,20 @@ td.dim { color: var(--muted); }
 .steps p { margin: 0; color: var(--muted); max-width: 64ch; text-wrap: pretty; }
 
 .cmd {
-  background: var(--well);
-  color: var(--well-ink);
+  background: var(--panel-2);
+  color: var(--ink);
   font-family: var(--mono);
   font-size: 13px;
   line-height: 1.8;
   padding: 13px 17px;
-  border: 1px solid var(--well-rule);
+  border: 1px solid var(--hair);
   border-radius: 10px;
   overflow-x: auto;
   white-space: pre;
 }
-.cmd .p { color: var(--well-cm); user-select: none; }
-.cmd .c { color: var(--well-key); }
-.cmd .cm { color: var(--well-cm); }
+.cmd .p { color: var(--code-dim); user-select: none; }
+.cmd .c { color: var(--code-key); font-weight: 500; }
+.cmd .cm { color: var(--code-cm); }
 
 /* ---------- figures ---------- */
 
@@ -466,16 +514,15 @@ td.dim { color: var(--muted); }
 
 .fig .n      { fill: var(--panel-2); stroke: var(--rule); stroke-width: 1; }
 .fig .n-acc  { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 1; }
-.fig .n-well { fill: var(--well); stroke: var(--well-rule); stroke-width: 1; }
+.fig .n-well { fill: var(--accent-soft); stroke: none; }
 .fig .n-bad  { fill: none; stroke: var(--bad); stroke-width: 1; stroke-dasharray: 4 3; }
 
 .fig .tt { font-family: var(--display); font-size: 14px; font-weight: 600; letter-spacing: -0.01em; fill: var(--ink); }
 .fig .ti { font-family: var(--mono); font-size: 11.5px; fill: var(--ink); }
 .fig .ts { font-family: var(--mono); font-size: 11px; fill: var(--muted); }
 .fig .tn { font-family: var(--mono); font-size: 12px; font-weight: 700; fill: var(--accent); }
-.fig .tw { fill: var(--well-ink); }
-.fig .tk { fill: var(--well-key); }
-.fig .td { fill: var(--well-dim); }
+.fig .tk { fill: var(--accent); }
+.fig .td { fill: var(--muted); }
 .fig .ta { fill: var(--accent); }
 .fig .tb { fill: var(--bad); }
 .fig .tok { fill: var(--ok); }
@@ -559,9 +606,8 @@ a:focus-visible, .install:focus-visible { outline: 2px solid var(--accent); outl
 
 @media (max-width: 720px) {
   .fig svg { min-width: 600px; }
-  .sec { grid-template-columns: 1fr; gap: 14px; }
-  .sec > .rail { position: static; }
-  .page { gap: 48px; padding: 40px 20px 72px; }
+  .page { gap: 44px; padding: 40px 20px 72px; }
+  .tabs { align-self: stretch; }
 }
 </style>
 
@@ -579,6 +625,12 @@ a:focus-visible, .install:focus-visible { outline: 2px solid var(--accent); outl
       yourself, and the Codex CLI and the desktop app both go through a gateway you
       control a few minutes later.
     </p>
+    <ul class="checks">
+      <li><b>One OpenAI key</b>, on the gateway host and nowhere else.</li>
+      <li><b>A virtual key per person</b>, with its own budget and its own revoke button.</li>
+      <li><b>Both clients routed</b> &#8212; the CLI and the Dock icon read the same config.</li>
+      <li><b>Every request logged</b>, with its cost attached to the key that made it.</li>
+    </ul>
     <div class="install"><span class="p">$</span> git clone https://github.com/misbahsy/codex-litellm-stack
 <span class="p">$</span> cd codex-litellm-stack
 <span class="p">$</span> <span class="c">./scripts/setup.sh</span></div>
@@ -643,9 +695,8 @@ a:focus-visible, .install:focus-visible { outline: 2px solid var(--accent); outl
   </header>
 
   <section class="sec">
-    <div class="rail">[setup]<span>start<br>here</span></div>
     <div class="body">
-      <h2>Setup</h2>
+      <div class="lockup"><h2><span class="k">Setup:</span> run one script, or hand it to an agent.</h2></div>
 
       <div class="tabs" role="tablist" aria-label="Setup method">
         <button class="tab" type="button" role="tab" id="tab-agent" aria-controls="pane-agent" aria-selected="true">Coding agent</button>
@@ -765,9 +816,8 @@ which files outside the repo you changed.</pre>
   </section>
 
   <section class="sec">
-    <div class="rail">[keys]<span>three keys,<br>three jobs</span></div>
     <div class="body">
-      <h2>Which key goes where</h2>
+      <div class="lockup"><h2><span class="k">Keys:</span> three of them, three different jobs.</h2></div>
       <p>
         Your OpenAI key is written once, into <code>docker-compose/litellm.env</code> on the
         machine running the gateway. Nothing else on the network sees it. Setup then uses the
@@ -836,9 +886,8 @@ which files outside the repo you changed.</pre>
   </section>
 
   <section class="sec">
-    <div class="rail">[models]<span>docker-compose/<br>litellm-config.yaml</span></div>
     <div class="body">
-      <h2>Model names pass through unchanged</h2>
+      <div class="lockup"><h2><span class="k">Models:</span> the names pass through unchanged.</h2><span class="chip">docker-compose/litellm-config.yaml</span></div>
       <p>
         There is no alias layer and nothing is renamed. A model id you would send to
         OpenAI works unchanged through the gateway; the destination is all that changes.
@@ -865,9 +914,8 @@ which files outside the repo you changed.</pre>
   </section>
 
   <section class="sec">
-    <div class="rail">[client]<span>~/.codex/<br>config.toml</span></div>
     <div class="body">
-      <h2>The generated client config</h2>
+      <div class="lockup"><h2><span class="k">Client config:</span> what setup writes for Codex.</h2><span class="chip">~/.codex/config.toml</span></div>
       <p>
         Codex holds a streaming connection open for a whole turn, so the stock timeouts
         are too short. The generated file sets a two-hour idle timeout and speaks the
@@ -900,9 +948,8 @@ which files outside the repo you changed.</pre>
   </section>
 
   <section class="sec">
-    <div class="rail">[desktop]<span>~/Library/<br>LaunchAgents</span></div>
     <div class="body">
-      <h2>The desktop app and the GUI login session</h2>
+      <div class="lockup"><h2><span class="k">Desktop app:</span> the Dock icon needs the key too.</h2><span class="chip">~/Library/LaunchAgents</span></div>
       <p>
         <code>codex app</code> and the icon in your Dock read the same config file, so
         they reach the gateway too. The key is the part that does not carry over. macOS gives an
@@ -989,9 +1036,8 @@ which files outside the repo you changed.</pre>
   </section>
 
   <section class="sec">
-    <div class="rail">[verify]<span>scripts/<br>doctor.sh</span></div>
     <div class="body">
-      <h2>Five checks along the request path</h2>
+      <div class="lockup"><h2><span class="k">Verify:</span> five checks along the request path.</h2><span class="chip">scripts/doctor.sh</span></div>
       <p>
         Setup finishes by running the doctor, and you can run it again any time. It sends
         an actual request through <code>/v1/responses</code> and then a second one with
@@ -1065,9 +1111,8 @@ which files outside the repo you changed.</pre>
   </section>
 
   <section class="sec">
-    <div class="rail">[fleet]<span>setup.sh<br>--enterprise</span></div>
     <div class="body">
-      <h2>Rolling it out with --enterprise</h2>
+      <div class="lockup"><h2><span class="k">Fleet:</span> roll the same config out to every laptop.</h2><span class="chip">setup.sh --enterprise</span></div>
       <p>
         Run setup with <code>--enterprise</code> and it also writes a secret-free
         <code>dist/config.toml</code>: base URL, wire protocol, timeouts and profiles, with the
@@ -1117,9 +1162,8 @@ which files outside the repo you changed.</pre>
   </section>
 
   <section class="sec">
-    <div class="rail">[layout]<span>on<br>disk</span></div>
     <div class="body">
-      <h2>Repo layout</h2>
+      <div class="lockup"><h2><span class="k">Layout:</span> what each file in the repo does.</h2></div>
 <pre class="tree">AGENTS.md                <span class="c">how the repo works, for the agent</span>
 <span class="d">.codex/skills/</span>
   codex-litellm-setup/       <span class="c">stand it up</span>

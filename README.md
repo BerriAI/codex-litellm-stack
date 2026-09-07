@@ -1,12 +1,17 @@
 # Codex + LiteLLM Stack
 
-Route the Codex CLI through your own [LiteLLM](https://github.com/BerriAI/litellm)
-gateway instead of letting [Codex](https://github.com/openai/codex) call OpenAI
-directly. One OpenAI key lives on the gateway, every request is logged there,
-and each person gets a key you can budget and revoke.
+Plenty of people run [Codex](https://github.com/openai/codex) through
+[LiteLLM](https://github.com/BerriAI/litellm), and wiring it up by hand means a
+compose file, a virtual key, and a client config Codex is picky about. This repo
+is that wiring. Hand the prompt below to your coding agent or run the script
+yourself, and the Codex CLI and the desktop app both go through a gateway you
+control a few minutes later.
 
-You need Docker running, an OpenAI API key, and the Codex CLI
-(`npm i -g @openai/codex`). Setup takes one command.
+One OpenAI key then lives on the gateway, every request is logged there, and
+each person gets a key you can budget and revoke.
+
+Bring an OpenAI API key and the Codex CLI (`npm i -g @openai/codex`). The
+gateway and its Postgres run in Docker Compose.
 
 ## Setup with a coding agent
 
@@ -14,14 +19,14 @@ Paste this into Codex from an empty directory. It clones the repo itself, so
 there is nothing to do first:
 
 > Clone `https://github.com/misbahsy/codex-litellm-stack`, cd into it, and set
-> it up so my Codex CLI goes through the LiteLLM gateway instead of calling
-> OpenAI directly. Read `AGENTS.md` and the skills in `.codex/skills/` first,
-> then follow the `codex-litellm-setup` procedure: check Docker is running and
-> port 4000 is free, run `./scripts/setup.sh` from the repo root, and ask me for
-> my OpenAI API key when the script wants it. Never invent a key. Finish by
-> running `./scripts/doctor.sh` and a real Codex turn, show me that request in
-> the gateway logs, and tell me exactly which files outside the repo you
-> changed.
+> it up so my Codex CLI and the Codex desktop app go through the LiteLLM gateway
+> instead of calling OpenAI directly. Read `AGENTS.md` and the skills in
+> `.codex/skills/` first, then follow the `codex-litellm-setup` procedure: run
+> `./scripts/setup.sh` from the repo root and ask me for my OpenAI API key when
+> the script wants it. Never invent a key. If one of its preflight checks stops
+> you, fix the cause and tell me what you did. Finish by running
+> `./scripts/doctor.sh` and a real Codex turn, show me that request in the
+> gateway logs, and tell me exactly which files outside the repo you changed.
 
 Codex reads `AGENTS.md` natively and discovers skills under `~/.codex/skills`,
 so the three in `.codex/skills/` work where they sit or copied there. Each one
@@ -33,9 +38,9 @@ covers a single task, failure modes included.
 | `codex-litellm-troubleshoot` | read the doctor output, fix failures in dependency order, and the failures the doctor can't see |
 | `codex-litellm-fleet` | the MDM artifact, the secret scan it must pass, per-user keys and budgets |
 
-An agent can also look at the machine before it changes anything: whether Docker
-is running, what already owns port 4000, whether the `~/.codex/config.toml` it
-is about to overwrite is one you want to keep.
+An agent can also look at the machine before it changes anything — what already
+owns port 4000, whether the `~/.codex/config.toml` it is about to overwrite is
+one you want to keep — and fix a failed step instead of handing you an error.
 
 ## Manual setup
 
@@ -49,23 +54,7 @@ git clone https://github.com/misbahsy/codex-litellm-stack
 cd codex-litellm-stack
 ```
 
-**2. Start Docker.** If this prints an error, Docker is installed but not
-running. Open Docker Desktop and wait for it to finish starting.
-
-```bash
-docker info
-```
-
-**3. Check that port 4000 is free.** No output means nothing holds it. If a
-tunnel or dev server does, add `--port 4010` to the next step: whatever is on
-that port will answer the health check and the checks will pass against the
-wrong server.
-
-```bash
-lsof -nP -iTCP:4000 -sTCP:LISTEN
-```
-
-**4. Run setup.** It asks for your OpenAI API key and saves it to
+**2. Run setup.** It asks for your OpenAI API key and saves it to
 `docker-compose/litellm.env` at mode 600. Then it starts LiteLLM and Postgres,
 mints a virtual key against the gateway, writes `~/.codex/config.toml` after
 backing up any existing one, and on macOS installs the LaunchAgent that hands
@@ -78,7 +67,13 @@ the key to the desktop app.
 #  --enterprise   also write dist/config.toml for MDM
 ```
 
-**5. Start Codex.** `dist/start-codex.sh` is generated and holds a live key, so
+The script checks the machine first: that the Docker daemon answers, and that
+nothing else holds port 4000. If a tunnel or dev server has that port, it stops
+and says so; whatever is listening there would answer the health check, and
+every check after it would pass against the wrong server. Run it again with
+`--port 4010`.
+
+**3. Start Codex.** `dist/start-codex.sh` is generated and holds a live key, so
 `dist/` is gitignored. `export LITELLM_API_KEY=… && codex` does the same thing.
 
 ```bash
@@ -86,7 +81,7 @@ the key to the desktop app.
 codex app                # desktop app; quit and reopen it once
 ```
 
-**6. Confirm the requests go through the gateway.** The doctor runs five checks
+**4. Confirm the requests go through the gateway.** The doctor runs five checks
 along the request path. The log line from that last command is what tells you
 Codex went to your gateway rather than straight to OpenAI.
 

@@ -5,66 +5,89 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;700&display=swap">
 
 <style>
-/* Colours are sampled from litellm.ai: ground #F6F6F6, ink #272B37, the
-   #5B3FD1 accent and the #F4F3FB surface tint it fills, in Geist and Geist
-   Mono. Green marks come from the LiteLLM docs teal. Every terminal well is
-   Codex black. The accent carries rules, marks and links only; nothing large
-   is painted with it. */
+/* The palette is litellm.ai's own: the #F3F3F3 ground, #272B37 ink, #D3D3D5
+   card rules, the #5B3FD1 accent and the #E6E6FF tint it fills, set in Geist
+   and Geist Mono. Terminal wells take #0C0A32, the navy the site uses for its
+   dark strips. */
 
 :root {
-  --ground:   #F6F6F6;
+  --ground:   #F3F3F3;
   --panel:    #FFFFFF;
+  --panel-2:  #F6F6F6;
   --ink:      #272B37;
-  --muted:    #6B7180;
-  --rule:     #E2E1E8;
+  --muted:    rgba(39, 43, 55, 0.72);
+  --dim:      rgba(39, 43, 55, 0.55);
+  --rule:     #D3D3D5;
+  --hair:     #EEEEEE;
   --accent:   #5B3FD1;
-  --accent-soft: #F4F3FB;
+  --accent-lift: #6A4FE8;
+  --accent-soft: #E6E6FF;
   --ok:       #0F8B72;
   --bad:      #C0392B;
-  --well:     #0D0D0D;
+  --well:     #0C0A32;
+  --shadow:   0 10px 30px rgba(12, 10, 50, 0.10);
+  --btn1-ink: #FFFFFF;
+  --btn2:     linear-gradient(#FFFFFF, #F7F7F9);
+  --dots:     radial-gradient(rgba(39, 43, 55, 0.13) 1px, rgba(0, 0, 0, 0) 1.2px);
 
   --display: "Geist", -apple-system, "Helvetica Neue", Arial, sans-serif;
   --body:    "Geist", -apple-system, "Helvetica Neue", Arial, sans-serif;
   --mono:    "Geist Mono", ui-monospace, "SF Mono", SFMono-Regular, Menlo, monospace;
 
-  /* Constant across themes: the wells are always the Codex terminal. */
-  --well-ink:  #DCDCDC;
-  --well-dim:  #8F8F8F;
-  --well-cm:   #6E6E6E;
-  --well-rule: #303030;
-  --well-key:  #B8A8FF;
+  /* Constant across themes: the wells are always the LiteLLM navy. */
+  --well-ink:  #E6E5F4;
+  --well-dim:  #9C99C6;
+  --well-cm:   #7A77A6;
+  --well-rule: #262255;
+  --well-key:  #C3C0FF;
   --well-str:  #8FE6B0;
-  --well-num:  #57F0F0;
+  --well-num:  #7FD9F5;
   --well-ok:   #8FE6B0;
-  --well-bad:  #E88872;
+  --well-bad:  #FF9E8A;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --ground:   #0D0D0D;
-    --panel:    #181818;
-    --ink:      #DCDCDC;
-    --muted:    #8F8F8F;
-    --rule:     #2B2B2B;
-    --accent:   #8B6DF0;
-    --accent-soft: #1D1C26;
+    --ground:   #08061F;
+    --panel:    #110E36;
+    --panel-2:  #0D0A2A;
+    --ink:      #E9E8F5;
+    --muted:    rgba(233, 232, 245, 0.72);
+    --dim:      rgba(233, 232, 245, 0.55);
+    --rule:     #2B2664;
+    --hair:     #221E52;
+    --accent:   #A69BFF;
+    --accent-lift: #B7ADFF;
+    --accent-soft: #241F55;
     --ok:       #25C2A0;
-    --bad:      #E88872;
-    --well:     #000000;
+    --bad:      #FF9E8A;
+    --well:     #05041A;
+    --shadow:   0 10px 30px rgba(0, 0, 0, 0.35);
+    --btn1-ink: #0C0A32;
+    --btn2:     linear-gradient(#161240, #110E36);
+    --dots:     radial-gradient(rgba(233, 232, 245, 0.14) 1px, rgba(0, 0, 0, 0) 1.2px);
   }
 }
 
 :root[data-theme="dark"] {
-  --ground:   #0D0D0D;
-  --panel:    #181818;
-  --ink:      #DCDCDC;
-  --muted:    #8F8F8F;
-  --rule:     #2B2B2B;
-  --accent:   #8B6DF0;
-  --accent-soft: #1D1C26;
+  --ground:   #08061F;
+  --panel:    #110E36;
+  --panel-2:  #0D0A2A;
+  --ink:      #E9E8F5;
+  --muted:    rgba(233, 232, 245, 0.72);
+  --dim:      rgba(233, 232, 245, 0.55);
+  --rule:     #2B2664;
+  --hair:     #221E52;
+  --accent:   #A69BFF;
+  --accent-lift: #B7ADFF;
+  --accent-soft: #241F55;
   --ok:       #25C2A0;
-  --bad:      #E88872;
-  --well:     #000000;
+  --bad:      #FF9E8A;
+  --well:     #05041A;
+  --shadow:   0 10px 30px rgba(0, 0, 0, 0.35);
+  --btn1-ink: #0C0A32;
+  --btn2:     linear-gradient(#161240, #110E36);
+  --dots:     radial-gradient(rgba(233, 232, 245, 0.14) 1px, rgba(0, 0, 0, 0) 1.2px);
 }
 
 * { box-sizing: border-box; }
@@ -93,35 +116,35 @@ body {
 
 .wordmark {
   font-family: var(--mono);
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 500;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--muted);
+  color: var(--accent);
   display: flex;
   align-items: center;
   gap: 10px;
   flex-wrap: wrap;
 }
-.wordmark b { color: var(--accent); font-weight: 700; }
-.wordmark .arrow { color: var(--rule); }
+.wordmark b { font-weight: 700; }
+.wordmark .arrow { color: var(--dim); }
 
 h1 {
   font-family: var(--display);
-  font-weight: 700;
-  font-size: clamp(29px, 4.2vw, 44px);
-  line-height: 1.12;
-  letter-spacing: -0.028em;
+  font-weight: 400;
+  font-size: clamp(33px, 5.2vw, 54px);
+  line-height: 1.08;
+  letter-spacing: -0.022em;
   text-wrap: balance;
   margin: 0;
-  max-width: 26ch;
+  max-width: 22ch;
 }
 
 .standfirst {
-  font-size: clamp(17px, 2.2vw, 20px);
-  line-height: 1.55;
+  font-size: clamp(16.5px, 2vw, 18.5px);
+  line-height: 1.6;
   color: var(--muted);
-  max-width: 62ch;
+  max-width: 60ch;
   margin: 0;
   text-wrap: pretty;
 }
@@ -134,10 +157,10 @@ h1 {
   line-height: 1.85;
   padding: 20px 22px;
   border: 1px solid var(--well-rule);
-  border-radius: 6px;
+  border-radius: 12px;
   overflow-x: auto;
   white-space: pre;
-  margin-top: 6px;
+  margin-top: 2px;
 }
 .install .p { color: var(--well-cm); user-select: none; }
 .install .c { color: var(--well-key); }
@@ -145,9 +168,29 @@ h1 {
 .runline {
   font-family: var(--mono);
   font-size: 12px;
-  color: var(--muted);
+  color: var(--dim);
   letter-spacing: 0.02em;
 }
+
+.cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 2px; }
+.btn {
+  font-family: var(--body);
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1;
+  text-decoration: none;
+  border-radius: 12px;
+  border: 1px solid var(--rule);
+  padding: 13px 22px;
+  background: var(--btn2);
+  color: var(--ink);
+}
+.btn-go {
+  background: linear-gradient(var(--accent-lift), var(--accent));
+  border-color: var(--accent);
+  color: var(--btn1-ink);
+}
+.btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 
 /* ---------- section rail ---------- */
 
@@ -162,22 +205,31 @@ h1 {
 
 .sec > .rail {
   font-family: var(--mono);
-  font-size: 12.5px;
+  font-size: 11px;
   font-weight: 500;
   color: var(--accent);
-  letter-spacing: 0.01em;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
   position: sticky;
   top: 24px;
 }
-.rail span { display: block; color: var(--muted); font-weight: 400; margin-top: 6px; line-height: 1.5; }
+.rail span {
+  display: block;
+  color: var(--dim);
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  margin-top: 8px;
+  line-height: 1.6;
+}
 
 .sec > .body { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
 
 h2 {
   font-family: var(--display);
-  font-weight: 600;
-  font-size: clamp(23px, 3vw, 29px);
-  letter-spacing: -0.024em;
+  font-weight: 500;
+  font-size: clamp(23px, 3vw, 31px);
+  letter-spacing: -0.014em;
   line-height: 1.2;
   margin: 0;
   text-wrap: balance;
@@ -197,7 +249,14 @@ code {
 
 /* ---------- table ---------- */
 
-.tablewrap { overflow-x: auto; }
+.tablewrap {
+  overflow-x: auto;
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  padding: 18px 22px 6px;
+}
 
 table {
   border-collapse: collapse;
@@ -216,10 +275,11 @@ th {
   color: var(--muted);
   padding: 0 18px 9px 0;
   border-bottom: 1px solid var(--rule);
+  white-space: nowrap;
 }
 td {
   padding: 12px 18px 12px 0;
-  border-bottom: 1px solid var(--rule);
+  border-bottom: 1px solid var(--hair);
   vertical-align: baseline;
 }
 tbody tr:last-child td { border-bottom: 0; }
@@ -232,7 +292,7 @@ td.dim { color: var(--muted); }
   background: var(--well);
   color: var(--well-ink);
   border: 1px solid var(--well-rule);
-  border-radius: 6px;
+  border-radius: 12px;
   overflow: hidden;
 }
 .well .cap {
@@ -360,8 +420,8 @@ td.dim { color: var(--muted); }
 }
 .steps h3 {
   font-family: var(--display);
-  font-weight: 600;
-  font-size: 17.5px;
+  font-weight: 500;
+  font-size: 18px;
   letter-spacing: -0.014em;
   line-height: 1.3;
   margin: 0;
@@ -376,7 +436,7 @@ td.dim { color: var(--muted); }
   line-height: 1.8;
   padding: 13px 17px;
   border: 1px solid var(--well-rule);
-  border-radius: 5px;
+  border-radius: 10px;
   overflow-x: auto;
   white-space: pre;
 }
@@ -387,17 +447,24 @@ td.dim { color: var(--muted); }
 /* ---------- figures ---------- */
 
 .fig { margin: 0; display: flex; flex-direction: column; gap: 12px; }
-.fig .figscroll { overflow-x: auto; }
+.fig .figscroll {
+  overflow-x: auto;
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  padding: 20px 22px;
+}
 .fig svg { display: block; width: 100%; height: auto; color: var(--ink); }
 .fig figcaption {
   font-family: var(--mono);
   font-size: 11.5px;
   line-height: 1.65;
-  color: var(--muted);
+  color: var(--dim);
   max-width: 66ch;
 }
 
-.fig .n      { fill: var(--panel); stroke: var(--rule); stroke-width: 1; }
+.fig .n      { fill: var(--panel-2); stroke: var(--rule); stroke-width: 1; }
 .fig .n-acc  { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 1; }
 .fig .n-well { fill: var(--well); stroke: var(--well-rule); stroke-width: 1; }
 .fig .n-bad  { fill: none; stroke: var(--bad); stroke-width: 1; stroke-dasharray: 4 3; }
@@ -423,12 +490,20 @@ td.dim { color: var(--muted); }
 .fig .ah-bad { fill: var(--bad); }
 
 .fig.hero { margin-top: 6px; }
+.fig.hero .figscroll {
+  background-image: var(--dots);
+  background-size: 18px 18px;
+}
 
 /* ---------- failure strip ---------- */
 
 .strip {
-  border-left: 2px solid var(--bad);
-  padding: 4px 0 4px 18px;
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--bad);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  padding: 16px 20px;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -452,6 +527,11 @@ td.dim { color: var(--muted); }
   white-space: pre;
   overflow-x: auto;
   color: var(--ink);
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  padding: 20px 22px;
   margin: 0;
 }
 .tree .d { color: var(--accent); }
@@ -489,18 +569,24 @@ a:focus-visible, .install:focus-visible { outline: 2px solid var(--accent); outl
 
   <header class="masthead">
     <div class="wordmark">
-      <span>Codex CLI</span><span class="arrow">&#8594;</span><b>LiteLLM</b><span class="arrow">&#8594;</span><span>OpenAI</span>
+      <span>Codex CLI &amp; app</span><span class="arrow">&#8594;</span><b>LiteLLM</b><span class="arrow">&#8594;</span><span>OpenAI</span>
     </div>
-    <h1>Codex CLI through a self-hosted LiteLLM gateway</h1>
+    <h1>One-command setup for Codex and a LiteLLM gateway</h1>
     <p class="standfirst">
-      Docker Compose brings up LiteLLM and Postgres. <code>scripts/setup.sh</code> mints
-      a virtual key, rewrites <code>~/.codex/config.toml</code> to point at the gateway,
-      and sends a request through the whole path before it exits.
+      Plenty of people run Codex through LiteLLM, and wiring it up by hand means a
+      compose file, a virtual key, and a client config Codex is picky about. This repo
+      is that wiring. Hand the prompt below to your coding agent or run the script
+      yourself, and the Codex CLI and the desktop app both go through a gateway you
+      control a few minutes later.
     </p>
     <div class="install"><span class="p">$</span> git clone https://github.com/misbahsy/codex-litellm-stack
 <span class="p">$</span> cd codex-litellm-stack
 <span class="p">$</span> <span class="c">./scripts/setup.sh</span></div>
-    <div class="runline">Needs Docker running and an OpenAI API key.</div>
+    <div class="cta">
+      <a class="btn btn-go" href="https://github.com/misbahsy/codex-litellm-stack">Repo on GitHub</a>
+      <a class="btn" href="https://docs.litellm.ai/docs/tutorials/openai_codex">LiteLLM docs</a>
+    </div>
+    <div class="runline">Bring an OpenAI API key. The gateway and its Postgres run in Docker Compose.</div>
 
     <figure class="fig hero">
       <div class="figscroll">
@@ -568,10 +654,11 @@ a:focus-visible, .install:focus-visible { outline: 2px solid var(--accent); outl
 
       <div class="pane" id="pane-agent" role="tabpanel" aria-labelledby="tab-agent">
         <p>
-          An agent checks the machine before it changes anything: whether Docker is
-          running, what already owns port 4000, whether the
-          <code>~/.codex/config.toml</code> it is about to overwrite is one you want to
-          keep. Paste this into Codex from an empty directory.
+          An agent can look at the machine before it changes anything &mdash; what
+          already owns port 4000, whether the <code>~/.codex/config.toml</code> it is
+          about to overwrite is one you want to keep &mdash; and fix a failed step
+          instead of handing you an error. Paste this into Codex from an empty
+          directory.
         </p>
         <div class="well">
           <div class="cap">
@@ -579,15 +666,16 @@ a:focus-visible, .install:focus-visible { outline: 2px solid var(--accent); outl
             <button class="copy" type="button" data-copy="agent-prompt">Copy</button>
           </div>
 <pre class="prompt" id="agent-prompt">Clone <code>https://github.com/misbahsy/codex-litellm-stack</code>, cd
-into it, and set it up so my Codex CLI goes through the LiteLLM
-gateway instead of calling OpenAI directly. Read <code>AGENTS.md</code> and
-the skills in <code>.codex/skills/</code> first, then follow the
-<code>codex-litellm-setup</code> procedure: check Docker is running and
-port 4000 is free, run <code>./scripts/setup.sh</code> from the repo root,
-and ask me for my OpenAI API key when the script wants it.
-Never invent a key. Finish by running <code>./scripts/doctor.sh</code> and a
-real Codex turn, show me that request in the gateway logs, and
-tell me exactly which files outside the repo you changed.</pre>
+into it, and set it up so my Codex CLI and the Codex desktop app
+go through the LiteLLM gateway instead of calling OpenAI directly.
+Read <code>AGENTS.md</code> and the skills in <code>.codex/skills/</code> first, then
+follow the <code>codex-litellm-setup</code> procedure: run
+<code>./scripts/setup.sh</code> from the repo root and ask me for my OpenAI
+API key when the script wants it. Never invent a key. If one of
+its preflight checks stops you, fix the cause and tell me what you
+did. Finish by running <code>./scripts/doctor.sh</code> and a real Codex turn,
+show me that request in the gateway logs, and tell me exactly
+which files outside the repo you changed.</pre>
         </div>
         <p>
           Codex reads <code>AGENTS.md</code> natively, and it discovers skills under
@@ -621,23 +709,6 @@ tell me exactly which files outside the repo you changed.</pre>
             <p>Every command below runs from that directory.</p>
           </li>
           <li>
-            <h3>Start Docker</h3>
-<div class="cmd"><span class="p">$</span> docker info</div>
-            <p>
-              If that prints an error, Docker is installed but not running. Open Docker
-              Desktop and wait for it to finish starting.
-            </p>
-          </li>
-          <li>
-            <h3>Check that port 4000 is free</h3>
-<div class="cmd"><span class="p">$</span> lsof -nP -iTCP:4000 -sTCP:LISTEN</div>
-            <p>
-              No output means nothing holds it. If a tunnel or dev server does, add
-              <code>--port 4010</code> to the next step: whatever is on that port will
-              answer the health check and the checks will pass against the wrong server.
-            </p>
-          </li>
-          <li>
             <h3>Run setup</h3>
 <div class="cmd"><span class="p">$</span> <span class="c">./scripts/setup.sh</span>
 <span class="cm"># --port 4010   bind somewhere else</span>
@@ -649,6 +720,13 @@ tell me exactly which files outside the repo you changed.</pre>
               and Postgres, mints a virtual key against the gateway, writes
               <code>~/.codex/config.toml</code> after backing up any existing one, and on
               macOS installs the LaunchAgent that hands the key to the desktop app.
+            </p>
+            <p>
+              The script checks the machine first: that the Docker daemon answers, and
+              that nothing else holds port 4000. If a tunnel or dev server has that
+              port, it stops and says so; whatever is listening there would answer the
+              health check, and every check after it would pass against the wrong
+              server. Run it again with <code>--port 4010</code>.
             </p>
             <p>
               Three keys, three jobs. Your OpenAI key stays in the gateway and never
@@ -762,9 +840,8 @@ tell me exactly which files outside the repo you changed.</pre>
     <div class="body">
       <h2>Model names pass through unchanged</h2>
       <p>
-        The only thing that changes is where requests go. There is no alias layer and
-        nothing is renamed: a model id you would send to OpenAI works unchanged through
-        the gateway.
+        There is no alias layer and nothing is renamed. A model id you would send to
+        OpenAI works unchanged through the gateway; the destination is all that changes.
       </p>
       <div class="well">
         <div class="cap">choosing a model</div>

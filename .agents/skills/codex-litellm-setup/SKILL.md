@@ -21,7 +21,7 @@ You may be handed this task with nothing on disk yet.
 If you are not already inside the repo, clone it and change into it:
 
 ```bash
-git clone https://github.com/misbahsy/codex-litellm-stack
+git clone https://github.com/BerriAI/codex-litellm-stack
 cd codex-litellm-stack
 ```
 
@@ -41,8 +41,9 @@ several steps later:
 
 1. **Docker is running.** `docker info` must succeed. If it doesn't, tell the
    user to start Docker Desktop; you can't start it for them on macOS.
-2. **An OpenAI API key exists.** Look at `docker-compose/litellm.env`. If
-   `OPENAI_API_KEY` is still `sk-proj-xxx`, ask the user for a key. **Never
+2. **An OpenAI API key is available.** On a fresh clone, setup creates the
+   ignored `docker-compose/litellm.env` from `litellm.env.example` and prompts
+   for the key. For unattended setup, put the key in that file first. **Never
    invent, guess, or reuse a key from elsewhere in the conversation**, and
    don't echo the key back in your reply once you have it.
 3. **Port 4000 is free.** Run `lsof -i :4000`. If something holds it, pass
@@ -74,6 +75,9 @@ the repo:
   to `config.toml.bak.<timestamp>` first. If the user had settings there they
   care about (MCP servers, sandbox policy, approval mode), offer to merge them
   back from the backup.
+- `~/.codex/fast.config.toml`, `deep.config.toml`, and `astra.config.toml` were
+  installed as current Codex profile files. Existing files with those names
+  were backed up first.
 - `dist/start-codex.sh` exports `LITELLM_API_KEY` and launches Codex. It
   contains a live credential and is gitignored. Keep it that way.
 - On macOS, `~/Library/LaunchAgents/com.codex-litellm-stack.env.plist` was
@@ -137,7 +141,7 @@ against OpenAI works here. Model choice lives entirely on the Codex side:
 ```bash
 codex                     # the default in config.toml
 codex -m gpt-6-astra      # any model, ad hoc
-codex --profile deep      # a saved model + reasoning-effort pair
+codex --profile deep      # loads ~/.codex/deep.config.toml
 ```
 
 Edit `docker-compose/litellm-config.yaml` only to *restrict* what the gateway

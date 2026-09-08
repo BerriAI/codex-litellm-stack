@@ -74,7 +74,8 @@ generated value is 7200000, two hours) and confirm `request_timeout` in
 **Codex works but nothing appears in the gateway logs.** Requests are going
 straight to OpenAI. Check, in order: `CODEX_HOME` pointing elsewhere;
 `model_provider` not set to `litellm` in `config.toml`; an `OPENAI_API_KEY` in
-the user's shell that Codex prefers; or a `--profile` whose provider differs.
+the user's shell that Codex prefers; or a selected profile file that overrides
+the provider.
 
 **The CLI works but the desktop app says the key is missing.** Expected, and
 not a config problem. Finder, the Dock and Spotlight give an app the GUI login
@@ -108,7 +109,7 @@ what you tested:
 codex exec --profile deep "say OK" 2>&1 | tail -20
 ```
 
-Profiles override the model *and* the provider. A profile pointing at a model
+Profiles load from `~/.codex/<name>.config.toml`. A profile pointing at a model
 the gateway doesn't serve fails while the default works fine.
 
 ## Rules

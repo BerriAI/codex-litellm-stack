@@ -1,0 +1,3 @@
+# Codex + LiteLLM Stack profile. Installed as ~/.codex/astra.config.toml.
+model = "gpt-6-astra"
+model_reasoning_effort = "high"

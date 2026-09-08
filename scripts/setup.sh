@@ -51,6 +51,10 @@ fi
 
 # ------------------------------------------------------------- litellm.env --
 step "Configuring the gateway"
+if [[ ! -f "$ENV_FILE" ]]; then
+  install -m 600 "$COMPOSE_DIR/litellm.env.example" "$ENV_FILE"
+  ok "created docker-compose/litellm.env from the example"
+fi
 chmod 600 "$ENV_FILE"
 [[ -n "$PORT" ]] && env_set LITELLM_PORT "$PORT"
 [[ -n "$(env_get LITELLM_PORT)" ]] || env_set LITELLM_PORT 4000
@@ -68,7 +72,8 @@ OPENAI_KEY="$(env_get OPENAI_API_KEY)"
 if [[ -z "$OPENAI_KEY" || "$OPENAI_KEY" == "sk-proj-xxx" ]]; then
   (( ASSUME_YES )) && die "set OPENAI_API_KEY in docker-compose/litellm.env, or drop --yes"
   printf '  OpenAI API key: '
-  read -r OPENAI_KEY || true
+  read -r -s OPENAI_KEY || true
+  printf '\n'
   [[ -n "$OPENAI_KEY" ]] || die "an OpenAI API key is required"
   env_set OPENAI_API_KEY "$OPENAI_KEY"
   ok "OPENAI_API_KEY saved to docker-compose/litellm.env"
@@ -129,9 +134,10 @@ CODEX_KEY="$(printf '%s' "$KEY_JSON" | sed -n 's/.*"key"[[:space:]]*:[[:space:]]
 if [[ -n "$CODEX_KEY" ]]; then
   ok "virtual key issued (revoke or budget it in the LiteLLM UI)"
 else
-  warn "could not mint a virtual key; falling back to the master key"
-  info "fine locally; for shared deployments issue per-user keys in the UI"
-  CODEX_KEY="$MASTER_KEY"
+  fail "could not mint a virtual key"
+  info "the master key will not be given to a Codex client"
+  info "check the gateway logs: docker compose -f docker-compose/docker-compose.yml logs litellm --tail 50"
+  exit 1
 fi
 
 # --------------------------------------------------------- codex config.toml --
@@ -164,6 +170,17 @@ fi
 if [[ -n "$TARGET" ]]; then
   render_toml > "$TARGET"
   ok "wrote $TARGET"
+
+  for profile in fast deep astra; do
+    PROFILE_TARGET="$CODEX_HOME/$profile.config.toml"
+    if [[ -f "$PROFILE_TARGET" ]] && ! grep -q 'Codex + LiteLLM Stack profile' "$PROFILE_TARGET"; then
+      PROFILE_BACKUP="$PROFILE_TARGET.bak.$(date +%Y%m%d%H%M%S)"
+      cp "$PROFILE_TARGET" "$PROFILE_BACKUP"
+      warn "existing $profile profile backed up to $(basename "$PROFILE_BACKUP")"
+    fi
+    cp "$COMPOSE_DIR/profiles/$profile.config.toml" "$PROFILE_TARGET"
+    ok "wrote $PROFILE_TARGET"
+  done
 fi
 
 # One command to start Codex with the key already in the environment.
@@ -225,7 +242,10 @@ fi
 if (( ENTERPRISE )); then
   step "Enterprise artifact"
   render_toml > "$DIST_DIR/config.toml"
-  ok "dist/config.toml is secret-free and ships via MDM to every laptop"
+  for profile in fast deep astra; do
+    cp "$COMPOSE_DIR/profiles/$profile.config.toml" "$DIST_DIR/$profile.config.toml"
+  done
+  ok "dist/*.toml is secret-free and ready for MDM"
   info "each user only needs LITELLM_API_KEY in their environment"
 fi
 
@@ -241,10 +261,10 @@ cat <<DONE
 ${BOLD}${GRN}Ready.${RST}
 
   ${BOLD}Start Codex:${RST}    ./dist/start-codex.sh
-  ${BOLD}Or manually:${RST}    export LITELLM_API_KEY=$CODEX_KEY && codex
+  ${BOLD}Or manually:${RST}    export LITELLM_API_KEY=<virtual-key> && codex
   ${BOLD}Desktop app:${RST}    codex app   ${DIM}(already has the key; no export needed)${RST}
 
-  Gateway UI   $GATEWAY_PUBLIC_URL/ui   (login: any user / $MASTER_KEY)
+  Gateway UI   $GATEWAY_PUBLIC_URL/ui   (master key is in docker-compose/litellm.env)
   Any model    codex -m gpt-6-astra   |   codex --profile deep
   Model list   $GATEWAY_PUBLIC_URL/v1/models ${DIM}(what the gateway will serve)${RST}
 

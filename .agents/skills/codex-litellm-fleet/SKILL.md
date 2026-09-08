@@ -19,11 +19,11 @@ Without `--public-url` the generated config says `http://localhost:4000`, which
 works on the machine that ran setup and fails on every other one. It must be a
 URL an engineer's laptop can resolve.
 
-This writes `dist/config.toml`. **Verify it carries no secret before you send
-it anywhere:**
+This writes `dist/config.toml` plus three profile files. **Verify they carry no
+secret before you send them anywhere:**
 
 ```bash
-grep -Ei 'sk-|api[_-]?key *=|secret|token' dist/config.toml
+grep -Ei 'sk-|api[_-]?key *=|secret|token' dist/*.toml
 ```
 
 The only credential reference should be `env_key = "LITELLM_API_KEY"`, the name
@@ -34,10 +34,10 @@ say so instead of shipping it.
 
 | Artifact | Destination | Carries a secret |
 |---|---|---|
-| `dist/config.toml` | `~/.codex/config.toml` on every laptop, via MDM | no |
+| `dist/*.toml` | `~/.codex/` on every laptop, via MDM | no |
 | `LITELLM_API_KEY` | each user's environment, via your secret manager | yes, one per person |
 | a LaunchAgent plist | `~/Library/LaunchAgents/` on macOS, if people use the desktop app | yes, that user's key |
-| `litellm.env` | the gateway host only | yes, and it never leaves the host |
+| `litellm.env` | the gateway host only | yes; LiteLLM sends the OpenAI key upstream over TLS |
 
 Issue **one virtual key per person**. Per-user spend, rate limits, and
 revocation on offboarding all depend on it:

@@ -4,7 +4,7 @@ This repo puts a LiteLLM gateway between the Codex CLI and OpenAI. The gateway
 holds the real OpenAI key and every request is logged and budgeted there; Codex
 gets a virtual key that can be revoked without touching anything else.
 
-If you are setting this up for someone, read `.codex/skills/` first; those
+If you are setting this up for someone, read `.agents/skills/` first; those
 files contain the actual procedures, including the failure modes. This file
 covers layout and rules only.
 
@@ -25,8 +25,9 @@ between them; it was removed deliberately.
 | `scripts/lib.sh` | shared helpers: Compose invocation, `litellm.env` read/write |
 | `scripts/uninstall-desktop-env.sh` | removes the macOS LaunchAgent that feeds the desktop app |
 | `docker-compose/litellm-config.yaml` | which models the gateway serves, and their limits |
-| `docker-compose/litellm.env` | **secrets.** chmod 600, never commit an edited copy |
+| `docker-compose/litellm.env.example` | tracked placeholders; setup copies it to ignored `litellm.env` |
 | `docker-compose/codex-config.toml` | template for the client config; `__BASE_URL__` is substituted at setup |
+| `docker-compose/profiles/` | current Codex profile files installed under `~/.codex/` |
 | `dist/` | generated, gitignored, **contains a live credential** |
 | `docs/index.html` | the landing page |
 

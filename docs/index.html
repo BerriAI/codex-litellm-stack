@@ -1,8 +1,14 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Run the Codex CLI and desktop app through a LiteLLM gateway.">
 <title>Codex + LiteLLM Stack</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&amp;family=Geist+Mono:wght@400;500;700&amp;display=swap">
 
 <style>
 /* The palette is litellm.ai's own: the #F3F3F3 ground, #272B37 ink, #D3D3D5
@@ -610,6 +616,8 @@ a:focus-visible, .install:focus-visible { outline: 2px solid var(--accent); outl
   .tabs { align-self: stretch; }
 }
 </style>
+</head>
+<body>
 
 <div class="page">
 
@@ -617,25 +625,22 @@ a:focus-visible, .install:focus-visible { outline: 2px solid var(--accent); outl
     <div class="wordmark">
       <span>Codex CLI &amp; app</span><span class="arrow">&#8594;</span><b>LiteLLM</b><span class="arrow">&#8594;</span><span>OpenAI</span>
     </div>
-    <h1>One-command setup for Codex and a LiteLLM gateway</h1>
+    <h1>Run Codex through your LiteLLM gateway</h1>
     <p class="standfirst">
-      Plenty of people run Codex through LiteLLM, and wiring it up by hand means a
-      compose file, a virtual key, and a client config Codex is picky about. This repo
-      is that wiring. Hand the prompt below to your coding agent or run the script
-      yourself, and the Codex CLI and the desktop app both go through a gateway you
-      control a few minutes later.
+      This repo wires the Codex CLI and desktop app to LiteLLM. Give the setup prompt
+      to Codex or run the script yourself.
     </p>
     <ul class="checks">
-      <li><b>One OpenAI key</b>, on the gateway host and nowhere else.</li>
+      <li><b>One OpenAI key</b>, stored only on the gateway host.</li>
       <li><b>A virtual key per person</b>, with its own budget and its own revoke button.</li>
-      <li><b>Both clients routed</b> &#8212; the CLI and the Dock icon read the same config.</li>
+      <li><b>Both clients routed.</b> The CLI and Dock app read the same config.</li>
       <li><b>Every request logged</b>, with its cost attached to the key that made it.</li>
     </ul>
-    <div class="install"><span class="p">$</span> git clone https://github.com/misbahsy/codex-litellm-stack
+    <div class="install"><span class="p">$</span> git clone https://github.com/BerriAI/codex-litellm-stack
 <span class="p">$</span> cd codex-litellm-stack
 <span class="p">$</span> <span class="c">./scripts/setup.sh</span></div>
     <div class="cta">
-      <a class="btn btn-go" href="https://github.com/misbahsy/codex-litellm-stack">Repo on GitHub</a>
+      <a class="btn btn-go" href="https://github.com/BerriAI/codex-litellm-stack">Repo on GitHub</a>
       <a class="btn" href="https://docs.litellm.ai/docs/tutorials/openai_codex">LiteLLM docs</a>
     </div>
     <div class="runline">Bring an OpenAI API key. The gateway and its Postgres run in Docker Compose.</div>
@@ -688,15 +693,15 @@ a:focus-visible, .install:focus-visible { outline: 2px solid var(--accent); outl
         </svg>
       </div>
       <figcaption>
-        Both clients read the same config file and send a virtual key to your gateway.
-        The OpenAI key sits in the gateway and goes no further.
+        Both clients send a virtual key to LiteLLM. LiteLLM uses the OpenAI key for
+        its upstream requests; Codex clients never receive it.
       </figcaption>
     </figure>
   </header>
 
   <section class="sec">
     <div class="body">
-      <div class="lockup"><h2><span class="k">Setup:</span> run one script, or hand it to an agent.</h2></div>
+      <div class="lockup"><h2><span class="k">Setup</span> with an agent or manually</h2></div>
 
       <div class="tabs" role="tablist" aria-label="Setup method">
         <button class="tab" type="button" role="tab" id="tab-agent" aria-controls="pane-agent" aria-selected="true">Coding agent</button>
@@ -705,33 +710,25 @@ a:focus-visible, .install:focus-visible { outline: 2px solid var(--accent); outl
 
       <div class="pane" id="pane-agent" role="tabpanel" aria-labelledby="tab-agent">
         <p>
-          An agent can look at the machine before it changes anything &mdash; what
-          already owns port 4000, whether the <code>~/.codex/config.toml</code> it is
-          about to overwrite is one you want to keep &mdash; and fix a failed step
-          instead of handing you an error. Paste this into Codex from an empty
-          directory.
+          A coding agent can check the port and protect your existing config before
+          setup changes anything. Paste this into Codex from an empty directory.
         </p>
         <div class="well">
           <div class="cap">
             <span>paste into Codex</span>
             <button class="copy" type="button" data-copy="agent-prompt">Copy</button>
           </div>
-<pre class="prompt" id="agent-prompt">Clone <code>https://github.com/misbahsy/codex-litellm-stack</code>, cd
-into it, and set it up so my Codex CLI and the Codex desktop app
-go through the LiteLLM gateway instead of calling OpenAI directly.
-Read <code>AGENTS.md</code> and the skills in <code>.codex/skills/</code> first, then
-follow the <code>codex-litellm-setup</code> procedure: run
-<code>./scripts/setup.sh</code> from the repo root and ask me for my OpenAI
-API key when the script wants it. Never invent a key. If one of
-its preflight checks stops you, fix the cause and tell me what you
-did. Finish by running <code>./scripts/doctor.sh</code> and a real Codex turn,
-show me that request in the gateway logs, and tell me exactly
-which files outside the repo you changed.</pre>
+<pre class="prompt" id="agent-prompt">Clone <code>https://github.com/BerriAI/codex-litellm-stack</code>, cd into it,
+and set up my Codex CLI and desktop app to use its LiteLLM gateway.
+Read <code>AGENTS.md</code> and the skills in <code>.agents/skills/</code>, then follow
+<code>codex-litellm-setup</code>. Ask for my OpenAI API key when needed.
+Never invent or print a key. Finish with <code>./scripts/doctor.sh</code> and
+a real Codex turn, confirm the request in the gateway logs, and list
+every file changed outside the repo.</pre>
         </div>
         <p>
-          Codex reads <code>AGENTS.md</code> natively, and it discovers skills under
-          <code>~/.codex/skills</code>, so the three in <code>.codex/skills/</code> work
-          where they sit or copied there. Each one covers a single task:
+          Codex reads <code>AGENTS.md</code> and discovers the three repo skills under
+          <code>.agents/skills/</code> automatically:
         </p>
         <div class="tablewrap">
           <table>
@@ -739,9 +736,9 @@ which files outside the repo you changed.</pre>
               <tr><th>Skill</th><th>What it covers</th></tr>
             </thead>
             <tbody>
-              <tr><td class="key">codex-litellm-setup</td><td class="dim">preflight, run setup, verify with a real turn, report what changed outside the repo</td></tr>
-              <tr><td class="key">codex-litellm-troubleshoot</td><td class="dim">read the doctor output, fix failures in dependency order, and the failures the doctor can&rsquo;t see</td></tr>
-              <tr><td class="key">codex-litellm-fleet</td><td class="dim">the MDM artifact, the secret scan it must pass, per-user keys and budgets</td></tr>
+              <tr><td class="key">codex-litellm-setup</td><td class="dim">preflight, setup, and verification</td></tr>
+              <tr><td class="key">codex-litellm-troubleshoot</td><td class="dim">gateway, key, model, and streaming failures</td></tr>
+              <tr><td class="key">codex-litellm-fleet</td><td class="dim">MDM files, per-user keys, and budgets</td></tr>
             </tbody>
           </table>
         </div>
@@ -749,13 +746,12 @@ which files outside the repo you changed.</pre>
 
       <div class="pane" id="pane-manual" role="tabpanel" aria-labelledby="tab-manual" hidden>
         <p>
-          Everything stays inside the repo except <code>~/.codex/config.toml</code> and,
-          on macOS, one LaunchAgent.
+          Setup writes Codex config files and, on macOS, one LaunchAgent outside the repo.
         </p>
         <ol class="steps">
           <li>
             <h3>Clone the repo</h3>
-<div class="cmd"><span class="p">$</span> git clone https://github.com/misbahsy/codex-litellm-stack
+<div class="cmd"><span class="p">$</span> git clone https://github.com/BerriAI/codex-litellm-stack
 <span class="p">$</span> cd codex-litellm-stack</div>
             <p>Every command below runs from that directory.</p>
           </li>
@@ -766,27 +762,12 @@ which files outside the repo you changed.</pre>
 <span class="cm"># --no-desktop  CLI only, skip the LaunchAgent</span>
 <span class="cm"># --enterprise  also write dist/config.toml for MDM</span></div>
             <p>
-              It asks for your OpenAI API key and saves it to
-              <code>docker-compose/litellm.env</code> at mode 600. Then it starts LiteLLM
-              and Postgres, mints a virtual key against the gateway, writes
-              <code>~/.codex/config.toml</code> after backing up any existing one, and on
-              macOS installs the LaunchAgent that hands the key to the desktop app.
+              It stores your OpenAI key in the ignored <code>litellm.env</code>, starts
+              LiteLLM and Postgres, mints a virtual key, and installs the Codex config.
             </p>
             <p>
-              The script checks the machine first: that the Docker daemon answers, and
-              that nothing else holds port 4000. If a tunnel or dev server has that
-              port, it stops and says so; whatever is listening there would answer the
-              health check, and every check after it would pass against the wrong
-              server. Run it again with <code>--port 4010</code>.
-            </p>
-            <p>
-              Three keys, three jobs. Your OpenAI key stays in the gateway and never
-              leaves the machine running it. The master key setup generates is the admin
-              credential: it logs into the LiteLLM UI and issues keys. The virtual key is
-              the one your Codex client gets, scoped so you can budget or revoke it on
-              its own. Setting this up for yourself, you hold all three. Running it for a
-              team, one admin does this once and issues a virtual key per person from the
-              UI.
+              If port 4000 is occupied, setup stops. Run it again with
+              <code>--port 4010</code>.
             </p>
           </li>
           <li>
@@ -794,9 +775,7 @@ which files outside the repo you changed.</pre>
 <div class="cmd"><span class="p">$</span> <span class="c">./dist/start-codex.sh</span>       <span class="cm"># CLI, key already exported</span>
 <span class="p">$</span> codex app                   <span class="cm"># desktop app; quit and reopen it once</span></div>
             <p>
-              <code>dist/start-codex.sh</code> is generated and holds a live key, so
-              <code>dist/</code> is gitignored. <code>export LITELLM_API_KEY=&hellip; &amp;&amp; codex</code>
-              does the same thing.
+              <code>dist/start-codex.sh</code> holds the virtual key and is gitignored.
             </p>
           </li>
           <li>
@@ -805,9 +784,7 @@ which files outside the repo you changed.</pre>
 <span class="p">$</span> codex exec <span class="c">"reply with the word CONNECTED and nothing else"</span>
 <span class="p">$</span> docker compose -f docker-compose/docker-compose.yml logs litellm --tail 20</div>
             <p>
-              The doctor runs five checks along the request path. The log line from that
-              last command is what tells you Codex went to your gateway rather than
-              straight to OpenAI.
+              The doctor tests the request path. The LiteLLM log confirms Codex used it.
             </p>
           </li>
         </ol>
@@ -817,11 +794,10 @@ which files outside the repo you changed.</pre>
 
   <section class="sec">
     <div class="body">
-      <div class="lockup"><h2><span class="k">Keys:</span> three of them, three different jobs.</h2></div>
+      <div class="lockup"><h2><span class="k">Keys</span> and where they live</h2></div>
       <p>
-        Your OpenAI key is written once, into <code>docker-compose/litellm.env</code> on the
-        machine running the gateway. Nothing else on the network sees it. Setup then uses the
-        master key to mint a virtual key, and that is the credential Codex sends.
+        The OpenAI key is stored only on the gateway host. LiteLLM sends it to OpenAI over
+        TLS; Codex receives a separate virtual key.
       </p>
       <figure class="fig">
         <div class="figscroll">
@@ -872,25 +848,21 @@ which files outside the repo you changed.</pre>
             <tr><th>Key</th><th>Lives in</th><th>What it does</th></tr>
           </thead>
           <tbody>
-            <tr><td class="key">OPENAI_API_KEY</td><td class="dim">docker-compose/litellm.env, chmod 600</td><td class="dim">pays OpenAI; the gateway is the only thing that reads it</td></tr>
+            <tr><td class="key">OPENAI_API_KEY</td><td class="dim">docker-compose/litellm.env, chmod 600</td><td class="dim">authenticates LiteLLM&rsquo;s upstream OpenAI requests</td></tr>
             <tr><td class="key">LITELLM_MASTER_KEY</td><td class="dim">the same env file</td><td class="dim">admin: signs into /ui, issues and revokes virtual keys</td></tr>
             <tr><td class="key">virtual key</td><td class="dim">dist/start-codex.sh and the LaunchAgent</td><td class="dim">what Codex sends on every request; budget or revoke it alone</td></tr>
           </tbody>
         </table>
       </div>
-      <p>
-        Solo, that is one virtual key you set once. On a team, one key per person is what
-        makes the spend view and the revoke button useful.
-      </p>
     </div>
   </section>
 
   <section class="sec">
     <div class="body">
-      <div class="lockup"><h2><span class="k">Models:</span> the names pass through unchanged.</h2><span class="chip">docker-compose/litellm-config.yaml</span></div>
+      <div class="lockup"><h2><span class="k">Models</span> pass through unchanged</h2><span class="chip">docker-compose/litellm-config.yaml</span></div>
       <p>
-        There is no alias layer and nothing is renamed. A model id you would send to
-        OpenAI works unchanged through the gateway; the destination is all that changes.
+        Model IDs pass through unchanged. Choose the default, an ad hoc model, or a
+        saved profile.
       </p>
       <div class="well">
         <div class="cap">choosing a model</div>
@@ -904,26 +876,21 @@ which files outside the repo you changed.</pre>
 <span class="k">codex</span> --profile deep</pre>
       </div>
       <p>
-        <code>litellm-config.yaml</code> lists the models you want visible in
-        <code>/v1/models</code>, which is also where per-model rate limits and budgets
-        attach, plus a <code>"*"</code> catch-all so anything else passes through without
-        an edit. Delete that entry and the gateway serves only the list, which is how you
-        restrict a fleet to approved models from one file.
+        The <code>"*"</code> catch-all accepts any OpenAI model. Remove it to serve only
+        the models listed in <code>litellm-config.yaml</code>.
       </p>
     </div>
   </section>
 
   <section class="sec">
     <div class="body">
-      <div class="lockup"><h2><span class="k">Client config:</span> what setup writes for Codex.</h2><span class="chip">~/.codex/config.toml</span></div>
+      <div class="lockup"><h2><span class="k">Client config</span> written by setup</h2><span class="chip">~/.codex/config.toml</span></div>
       <p>
-        Codex holds a streaming connection open for a whole turn, so the stock timeouts
-        are too short. The generated file sets a two-hour idle timeout and speaks the
-        Responses wire protocol, which LiteLLM serves directly.
+        Setup writes the LiteLLM provider and a two-hour streaming idle timeout.
       </p>
       <div class="well">
         <div class="cap">~/.codex/config.toml</div>
-<pre><span class="cm"># generated by scripts/setup.sh; only base_url is really new</span>
+<pre><span class="cm"># ~/.codex/config.toml</span>
 <span class="k">model</span> = <span class="s">"gpt-5.6-terra"</span>
 <span class="k">model_provider</span> = <span class="s">"litellm"</span>
 <span class="k">model_reasoning_effort</span> = <span class="s">"medium"</span>
@@ -932,34 +899,22 @@ which files outside the repo you changed.</pre>
 <span class="k">base_url</span> = <span class="s">"http://localhost:4000/v1"</span>
 <span class="k">env_key</span> = <span class="s">"LITELLM_API_KEY"</span>
 <span class="k">wire_api</span> = <span class="s">"responses"</span>
-<span class="k">stream_idle_timeout_ms</span> = <span class="n">7200000</span>   <span class="cm"># two hours; a turn can take that long</span>
-<span class="k">stream_max_retries</span> = <span class="n">5</span>
-
-<span class="tbl">[profiles.astra]</span>
-<span class="k">model</span> = <span class="s">"gpt-6-astra"</span>
-<span class="k">model_reasoning_effort</span> = <span class="s">"high"</span></pre>
+<span class="k">stream_idle_timeout_ms</span> = <span class="n">7200000</span>
+<span class="k">stream_max_retries</span> = <span class="n">5</span></pre>
       </div>
       <p>
-        The key in <code>LITELLM_API_KEY</code> is a virtual key minted at setup. Budget
-        it, rate-limit it, or revoke it from the LiteLLM UI. The gateway master key never
-        reaches a laptop.
+        Named profiles are separate files such as <code>~/.codex/deep.config.toml</code>,
+        which works with <code>codex --profile deep</code> on current Codex versions.
       </p>
     </div>
   </section>
 
   <section class="sec">
     <div class="body">
-      <div class="lockup"><h2><span class="k">Desktop app:</span> the Dock icon needs the key too.</h2><span class="chip">~/Library/LaunchAgents</span></div>
+      <div class="lockup"><h2><span class="k">Desktop app</span> key delivery</h2><span class="chip">~/Library/LaunchAgents</span></div>
       <p>
-        <code>codex app</code> and the icon in your Dock read the same config file, so
-        they reach the gateway too. The key is the part that does not carry over. macOS gives an
-        app launched from Finder, the Dock or Spotlight the environment of your GUI login
-        session, never a shell&rsquo;s, so a key exported in <code>.zshrc</code> or by a
-        launcher script is invisible to it.
-      </p>
-      <p>
-        Setup installs a LaunchAgent that puts the key into that session at every login,
-        so it survives a reboot and there is no per-launch command to remember.
+        The app reads the same config as the CLI, but it cannot see shell variables.
+        Setup installs a LaunchAgent that gives the app its virtual key at login.
       </p>
       <figure class="fig">
         <div class="figscroll">
@@ -1011,8 +966,7 @@ which files outside the repo you changed.</pre>
           </svg>
         </div>
         <figcaption>
-          The LaunchAgent exists because the top row and the bottom row do not share an
-          environment.
+          Terminal and desktop apps inherit different environments on macOS.
         </figcaption>
       </figure>
       <div class="well">
@@ -1027,22 +981,18 @@ which files outside the repo you changed.</pre>
 <span class="k">./scripts/setup.sh</span> --no-desktop</pre>
       </div>
       <p>
-        The plist holds the key at <code>chmod 600</code>, and the login session makes it
-        readable to every process you run, which is a wider reach than the CLI-only path.
-        What sits there is a budgeted virtual key you can revoke from the LiteLLM UI, not
-        the OpenAI key. <code>scripts/uninstall-desktop-env.sh</code> takes it back out.
+        Every process in the login session can read this virtual key. Use
+        <code>--no-desktop</code> for CLI-only setup.
       </p>
     </div>
   </section>
 
   <section class="sec">
     <div class="body">
-      <div class="lockup"><h2><span class="k">Verify:</span> five checks along the request path.</h2><span class="chip">scripts/doctor.sh</span></div>
+      <div class="lockup"><h2><span class="k">Verify</span> the complete request path</h2><span class="chip">scripts/doctor.sh</span></div>
       <p>
-        Setup finishes by running the doctor, and you can run it again any time. It sends
-        an actual request through <code>/v1/responses</code> and then a second one with
-        streaming on, because a gateway that answers a health check can still fail the
-        kind of request Codex actually sends.
+        The doctor checks authentication, model availability, a real
+        <code>/v1/responses</code> request, and streaming.
       </p>
       <figure class="fig">
         <div class="figscroll">
@@ -1112,17 +1062,10 @@ which files outside the repo you changed.</pre>
 
   <section class="sec">
     <div class="body">
-      <div class="lockup"><h2><span class="k">Fleet:</span> roll the same config out to every laptop.</h2><span class="chip">setup.sh --enterprise</span></div>
+      <div class="lockup"><h2><span class="k">Fleet</span> rollout with MDM</h2><span class="chip">setup.sh --enterprise</span></div>
       <p>
-        Run setup with <code>--enterprise</code> and it also writes a secret-free
-        <code>dist/config.toml</code>: base URL, wire protocol, timeouts and profiles, with the
-        credential left as an environment variable for your own secret delivery. The
-        <code>codex-litellm-fleet</code> skill has the grep that proves it carries no secret. That file
-        is what goes out over MDM.
-      </p>
-      <p>
-        Engineers install Codex, get the config from device management, and the first
-        <code>codex</code> they run is already pointed at the gateway.
+        <code>--enterprise</code> writes a secret-free base config and three profile files
+        for MDM. Deliver each person&rsquo;s virtual key through your secret manager.
       </p>
       <figure class="fig">
         <div class="figscroll">
@@ -1158,31 +1101,6 @@ which files outside the repo you changed.</pre>
           LiteLLM UI.
         </figcaption>
       </figure>
-    </div>
-  </section>
-
-  <section class="sec">
-    <div class="body">
-      <div class="lockup"><h2><span class="k">Layout:</span> what each file in the repo does.</h2></div>
-<pre class="tree">AGENTS.md                <span class="c">how the repo works, for the agent</span>
-<span class="d">.codex/skills/</span>
-  codex-litellm-setup/       <span class="c">stand it up</span>
-  codex-litellm-troubleshoot/  <span class="c">when it doesn&rsquo;t work</span>
-  codex-litellm-fleet/       <span class="c">ship it to everyone</span>
-<span class="d">docker-compose/</span>
-  docker-compose.yml     <span class="c">gateway + postgres</span>
-  litellm-config.yaml    <span class="c">which models the gateway serves</span>
-  litellm.env            <span class="c">OPENAI_API_KEY, master key, port</span>
-  codex-config.toml      <span class="c">template for the client config</span>
-<span class="d">scripts/</span>
-  setup.sh               <span class="c">the one command</span>
-  doctor.sh              <span class="c">the five checks</span>
-  lib.sh                 <span class="c">shared helpers</span>
-  uninstall-desktop-env.sh <span class="c">takes the LaunchAgent back out</span></pre>
-      <p>
-        Postgres is included so virtual keys and spend survive a restart. Point
-        <code>DATABASE_URL</code> at your own instance and drop the service if you already run one.
-      </p>
     </div>
   </section>
 
@@ -1247,3 +1165,5 @@ tabs.forEach(function (tab, i) {
   });
 });
 </script>
+</body>
+</html>

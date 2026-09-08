@@ -1,268 +1,161 @@
 # Codex + LiteLLM Stack
 
-Plenty of people run [Codex](https://github.com/openai/codex) through
-[LiteLLM](https://github.com/BerriAI/litellm), and wiring it up by hand means a
-compose file, a virtual key, and a client config Codex is picky about. This repo
-is that wiring. Hand the prompt below to your coding agent or run the script
-yourself, and the Codex CLI and the desktop app both go through a gateway you
-control a few minutes later.
+Route the Codex CLI and desktop app through a LiteLLM gateway with one setup
+script. LiteLLM logs requests, tracks spend, and issues a separate virtual key
+for each person. Codex clients never receive the OpenAI API key.
 
-One OpenAI key then lives on the gateway, every request is logged there, and
-each person gets a key you can budget and revoke.
-
-Bring an OpenAI API key and the Codex CLI (`npm i -g @openai/codex`). The
-gateway and its Postgres run in Docker Compose.
+Bring an OpenAI API key, the Codex CLI (`npm i -g @openai/codex`), and Docker
+Compose.
 
 ## Setup with a coding agent
 
-Paste this into Codex from an empty directory. It clones the repo itself, so
-there is nothing to do first:
+Paste this into Codex from an empty directory:
 
-> Clone `https://github.com/misbahsy/codex-litellm-stack`, cd into it, and set
-> it up so my Codex CLI and the Codex desktop app go through the LiteLLM gateway
-> instead of calling OpenAI directly. Read `AGENTS.md` and the skills in
-> `.codex/skills/` first, then follow the `codex-litellm-setup` procedure: run
-> `./scripts/setup.sh` from the repo root and ask me for my OpenAI API key when
-> the script wants it. Never invent a key. If one of its preflight checks stops
-> you, fix the cause and tell me what you did. Finish by running
-> `./scripts/doctor.sh` and a real Codex turn, show me that request in the
-> gateway logs, and tell me exactly which files outside the repo you changed.
+> Clone `https://github.com/BerriAI/codex-litellm-stack`, cd into it, and set up
+> my Codex CLI and desktop app to use its LiteLLM gateway. Read `AGENTS.md` and
+> the skills in `.agents/skills/`, then follow `codex-litellm-setup`. Ask for my
+> OpenAI API key when the script needs it. Never invent or print a key. Finish
+> by running `./scripts/doctor.sh` and a real Codex turn, confirm the request in
+> the gateway logs, and list every file changed outside the repo.
 
-Codex reads `AGENTS.md` natively and discovers skills under `~/.codex/skills`,
-so the three in `.codex/skills/` work where they sit or copied there. Each one
-covers a single task, failure modes included.
+The repo includes three skills:
 
-| Skill | What it covers |
+| Skill | Job |
 |---|---|
-| `codex-litellm-setup` | preflight, run setup, verify with a real turn, report what changed outside the repo |
-| `codex-litellm-troubleshoot` | read the doctor output, fix failures in dependency order, and the failures the doctor can't see |
-| `codex-litellm-fleet` | the MDM artifact, the secret scan it must pass, per-user keys and budgets |
-
-An agent can also look at the machine before it changes anything — what already
-owns port 4000, whether the `~/.codex/config.toml` it is about to overwrite is
-one you want to keep — and fix a failed step instead of handing you an error.
+| `codex-litellm-setup` | preflight, setup, and end-to-end verification |
+| `codex-litellm-troubleshoot` | diagnose gateway, key, model, and streaming failures |
+| `codex-litellm-fleet` | prepare secret-free MDM files and per-user keys |
 
 ## Manual setup
 
-Everything stays inside the repo except `~/.codex/config.toml` and, on macOS,
-one LaunchAgent.
-
-**1. Clone the repo.** Every command below runs from that directory.
-
 ```bash
-git clone https://github.com/misbahsy/codex-litellm-stack
+git clone https://github.com/BerriAI/codex-litellm-stack
 cd codex-litellm-stack
-```
-
-**2. Run setup.** It asks for your OpenAI API key and saves it to
-`docker-compose/litellm.env` at mode 600. Then it starts LiteLLM and Postgres,
-mints a virtual key against the gateway, writes `~/.codex/config.toml` after
-backing up any existing one, and on macOS installs the LaunchAgent that hands
-the key to the desktop app.
-
-```bash
 ./scripts/setup.sh
-#  --port 4010    bind somewhere else
-#  --no-desktop   CLI only, skip the LaunchAgent
-#  --enterprise   also write dist/config.toml for MDM
 ```
 
-The script checks the machine first: that the Docker daemon answers, and that
-nothing else holds port 4000. If a tunnel or dev server has that port, it stops
-and says so; whatever is listening there would answer the health check, and
-every check after it would pass against the wrong server. Run it again with
-`--port 4010`.
+The script:
 
-**3. Start Codex.** `dist/start-codex.sh` is generated and holds a live key, so
-`dist/` is gitignored. `export LITELLM_API_KEY=… && codex` does the same thing.
+- creates the ignored `docker-compose/litellm.env` at mode 600;
+- starts LiteLLM and Postgres;
+- mints a virtual key for Codex;
+- backs up and writes `~/.codex/config.toml`;
+- installs `fast`, `deep`, and `astra` profile files; and
+- on macOS, installs a LaunchAgent for the desktop app.
+
+Use another port if 4000 is occupied:
 
 ```bash
-./dist/start-codex.sh    # CLI, key already exported
-codex app                # desktop app; quit and reopen it once
+./scripts/setup.sh --port 4010
 ```
 
-**4. Confirm the requests go through the gateway.** The doctor runs five checks
-along the request path. The log line from that last command is what tells you
-Codex went to your gateway rather than straight to OpenAI.
+Start Codex and verify the request path:
 
 ```bash
+./dist/start-codex.sh
 ./scripts/doctor.sh
 codex exec "reply with the word CONNECTED and nothing else"
 docker compose -f docker-compose/docker-compose.yml logs litellm --tail 20
 ```
 
-## Which key is which
+The log should contain a POST to `/v1/responses`.
 
-Setup handles three keys with three different jobs.
+## The three keys
 
-| Key | Where it lives | Who it's for |
+| Key | Stored in | Used by |
 |---|---|---|
-| `OPENAI_API_KEY` | `docker-compose/litellm.env` on the gateway host | nobody. It never leaves the gateway |
-| `LITELLM_MASTER_KEY` | the same file, generated by setup | the admin. Logs into the LiteLLM UI, issues and revokes keys |
-| the virtual key | `dist/start-codex.sh`, the LaunchAgent, `LITELLM_API_KEY` | the user. What Codex sends on every request |
+| `OPENAI_API_KEY` | `docker-compose/litellm.env` | LiteLLM, to authenticate upstream OpenAI requests |
+| `LITELLM_MASTER_KEY` | the same file | gateway administration and virtual-key issuance |
+| virtual key | `dist/start-codex.sh` and the LaunchAgent | Codex requests; budget and revoke it independently |
 
-Setting this up for yourself, you hold all three. Running it for a team, one
-admin does this once on the gateway host and issues a virtual key per person
-from the UI, so per-user spend, rate limits, and offboarding all live on the
-gateway.
+The OpenAI key is stored only on the gateway host. LiteLLM sends it to
+`api.openai.com` over TLS; it is never distributed to Codex clients.
 
-## What changes
+## Codex configuration
 
-Only where requests go. Your `~/.codex/config.toml` ends up as:
+Setup writes this base configuration:
 
 ```toml
 model = "gpt-5.6-terra"
 model_provider = "litellm"
 
 [model_providers.litellm]
+name = "LiteLLM Gateway"
 base_url = "http://localhost:4000/v1"
 env_key = "LITELLM_API_KEY"
 wire_api = "responses"
-stream_idle_timeout_ms = 7200000   # two hours; a turn can take that long
+stream_idle_timeout_ms = 7200000
 ```
 
-Model names are OpenAI's real ids, so there's no alias layer to learn. The
-gateway serves the models listed in `litellm-config.yaml` plus a `"*"`
-catch-all, so anything that works against OpenAI works here, and you pick a
-model the way you already do:
+Current Codex versions load named profiles from separate files:
+
+| Command | File | Model |
+|---|---|---|
+| `codex --profile fast` | `~/.codex/fast.config.toml` | `gpt-5.6-luna`, low effort |
+| `codex --profile deep` | `~/.codex/deep.config.toml` | `gpt-5.6-sol`, high effort |
+| `codex --profile astra` | `~/.codex/astra.config.toml` | `gpt-6-astra`, high effort |
+
+Model IDs pass through unchanged. The gateway publishes the explicit model
+list plus a `"*"` catch-all. Remove the catch-all to restrict access.
+
+## Desktop app
+
+The desktop app reads `~/.codex/config.toml`, but apps opened from Finder, the
+Dock, or Spotlight do not inherit shell variables. On macOS, setup installs
+`~/Library/LaunchAgents/com.codex-litellm-stack.env.plist` so the app receives
+its virtual key at login. Quit and reopen Codex after setup.
+
+The plist is mode 600, but every process in the login session can read the
+virtual key. Keep the desktop integration only if that tradeoff is acceptable:
 
 ```bash
-codex                     # gpt-5.6-terra
-codex -m gpt-6-astra      # anything else
-codex --profile deep      # a saved model + reasoning-effort pair
+./scripts/setup.sh --no-desktop
+./scripts/uninstall-desktop-env.sh
 ```
 
-## The desktop app
-
-`codex app` and the Codex icon in your Dock read the same
-`~/.codex/config.toml`, so they hit the gateway too. The key is the part that
-doesn't carry over. Finder, the Dock and Spotlight hand an app the environment of your
-GUI login session, never a shell's, so anything a `.zshrc` or
-`dist/start-codex.sh` exports is invisible to the app.
-
-Setup installs a LaunchAgent at
-`~/Library/LaunchAgents/com.codex-litellm-stack.env.plist` that puts
-`LITELLM_API_KEY` into that session at every login. One time, no per-launch
-command, and it survives reboots. Open the app however you normally would.
-
-```bash
-codex app                              # launches it; installs it if missing
-./scripts/uninstall-desktop-env.sh     # take the key back out
-./scripts/setup.sh --no-desktop        # CLI only; never install the agent
-```
-
-The plist holds the key in plaintext at chmod 600, and `launchctl setenv` makes
-it readable by every process in your login session, which is a wider blast
-radius than the CLI-only path. What sits there is a virtual key you can revoke
-from the LiteLLM UI, not the OpenAI key. A running app won't see a key that
-arrived after it started, so quit and reopen Codex after the first setup or
-after re-running it.
-
-## Verifying the path
-
-`doctor.sh` checks whether the turn you just ran went through your gateway,
-which Codex itself won't tell you.
-
-```bash
-./scripts/doctor.sh
-```
-
-It walks the path Codex uses, and each failure names its own fix:
-
-```
-==> 1/5  Gateway reachable      ✓ http://localhost:4000 responds
-==> 2/5  Key accepted           ✓ authenticated (HTTP 200)
-==> 3/5  Model published        ✓ 'gpt-5.6-terra' is served by the gateway
-==> 4/5  Provider round trip    ✗ round trip failed (HTTP 401)
-                                  OpenAI rejected the key. Check OPENAI_API_KEY in
-                                  docker-compose/litellm.env
-==> 5/5  Streaming              ✗ no SSE frames received
-                                  Codex will hang on every turn until this passes
-```
-
-It hits `/v1/responses`, the endpoint `wire_api = "responses"` actually uses, so
-a bad key, a model you don't have access to, or an exhausted quota surfaces here
-instead of as a silent hang inside Codex. Streaming gets its own check because
-Codex streams every turn.
-
-Give a failing run back to your agent with the `codex-litellm-troubleshoot`
-skill and it'll work the checks in order.
-
-## Rolling it out to a fleet
+## Fleet rollout
 
 ```bash
 ./scripts/setup.sh --public-url https://llm-gw.corp.example --enterprise
 ```
 
-Writes `dist/config.toml` with **no secrets in it**: the gateway URL and
-`env_key = "LITELLM_API_KEY"`. Ship it via MDM to `~/.codex/config.toml` on
-every machine. Each engineer supplies their own `LITELLM_API_KEY`, issued and
-revocable in the LiteLLM UI.
+This writes four secret-free files to `dist/`: `config.toml` and the three
+profile files. Distribute them to `~/.codex/` with MDM and deliver one
+`LITELLM_API_KEY` per person through your secret manager.
 
-Ship a LaunchAgent alongside it if people use the desktop app: `dist/config.toml`
-tells Codex where the gateway is, but on macOS only a LaunchAgent gets each
-user's key into the GUI session, and `launchctl setenv` run by hand is gone
-after a reboot.
+Before a fleet rollout, provide TLS, durable Postgres, unbuffered SSE, and a
+rollback path. The included Compose stack is a local target, not a production
+deployment.
 
-The `codex-litellm-fleet` skill covers buffered SSE behind a load balancer,
-Postgres durability, and clobbering configs people cared about.
+## Repository layout
 
-## Layout
-
-```
-AGENTS.md                  how the repo works, for the agent
-.codex/skills/
-  codex-litellm-setup/     stand it up
-  codex-litellm-troubleshoot/  when it doesn't work
-  codex-litellm-fleet/     ship it to everyone
-docker-compose/
-  docker-compose.yml       gateway + postgres
-  litellm-config.yaml      which models the gateway serves
-  litellm.env              OPENAI_API_KEY, master key, port
-  codex-config.toml        the client config, templated
-scripts/
-  setup.sh                 the one command
-  doctor.sh                the connectivity check
-  uninstall-desktop-env.sh removes the desktop app's LaunchAgent
-docs/
-  index.html               the landing page (static; open it or drop it on any host)
-dist/                      generated: start-codex.sh, config.toml (--enterprise)
+```text
+AGENTS.md                  instructions for coding agents
+.agents/skills/            setup, troubleshooting, and fleet procedures
+docker-compose/            LiteLLM, Postgres, config, and profile templates
+scripts/setup.sh           configure and verify the stack
+scripts/doctor.sh          test the complete request path
+docs/index.html            GitHub Pages site
+dist/                      generated files containing a live virtual key
 ```
 
 ## Options
 
-```
+```text
 ./scripts/setup.sh
-  --port <n>            host port for the gateway (default 4000)
-  --public-url <url>    base URL clients use (default http://localhost:<port>)
-  -y, --yes             unattended; fail instead of prompting
-  --enterprise          also write the secret-free dist/config.toml
-  --no-desktop          skip the desktop app's LaunchAgent (macOS)
+  --port <n>            gateway port (default 4000)
+  --public-url <url>    URL clients use
+  -y, --yes             fail instead of prompting
+  --enterprise          generate MDM files
+  --no-desktop          skip the macOS LaunchAgent
 
 ./scripts/doctor.sh
-  --base <url>          gateway to test (default: from litellm.env)
-  --model <name>        model to exercise (default: gpt-5.6-terra)
+  --base <url>          gateway URL
+  --model <name>        model to test (default gpt-5.6-terra)
 ```
 
-## Notes
-
-- `docker-compose/litellm.env` is chmod 600 after setup runs and holds real
-  secrets. Don't commit your edited copy.
-- Adding observability takes two lines: uncomment `success_callback: ["langfuse"]`
-  in `litellm-config.yaml` and add your Langfuse keys to `litellm.env`.
-- `setup.sh` backs up an existing `~/.codex/config.toml` before replacing it.
-  Answer `n` at the prompt to keep yours and get the new one as
-  `dist/config.toml.new` to merge yourself.
-- To restrict what the fleet can reach, delete the `"*"` entry from
-  `litellm-config.yaml` and list only approved models.
-- `docker compose down -v` deletes the Postgres volume, and with it every issued
-  virtual key and all spend history. Use `restart litellm` unless you want a
-  clean slate.
-
-## Not yet built
-
-Terraform and Helm for a hosted gateway. Right now `--public-url` assumes you've
-deployed LiteLLM somewhere yourself.
+`docker compose down -v` deletes every issued virtual key and all spend
+history. Use `restart litellm` unless you intend to erase the Postgres volume.
 
 ## License
 

@@ -1,3 +1,4 @@
 dist/
+docker-compose/litellm.env
 docs/node_modules/
 docs/.next/

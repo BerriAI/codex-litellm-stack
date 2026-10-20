@@ -119,7 +119,7 @@ fi
 step "5/5  Streaming"
 STREAM="$(curl -s --max-time 90 -N -X POST "$BASE/v1/responses" \
   -H "Authorization: Bearer $KEY" -H 'Content-Type: application/json' \
-  -d '{"model":"'"$MODEL"'","input":"Count: 1 2 3","stream":true,"max_output_tokens":32}' 2>/dev/null | head -c 4000)"
+  -d '{"model":"'"$MODEL"'","input":"Count: 1 2 3","stream":true,"max_output_tokens":32}' 2>/dev/null | head -c 4000 || true)"
 if printf '%s' "$STREAM" | grep -q '^data:'; then
   ok "SSE stream flowing"
 else

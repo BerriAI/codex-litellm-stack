@@ -60,10 +60,14 @@ chmod 600 "$ENV_FILE"
 [[ -n "$(env_get LITELLM_PORT)" ]] || env_set LITELLM_PORT 4000
 
 MASTER_KEY="$(env_get LITELLM_MASTER_KEY)"
-if [[ -z "$MASTER_KEY" || "$MASTER_KEY" == "sk-1234" ]]; then
+if [[ -z "$MASTER_KEY" ]]; then
   MASTER_KEY="$(gen_key)"
   env_set LITELLM_MASTER_KEY "$MASTER_KEY"
   ok "generated a fresh master key"
+elif is_public_example_master_key "$MASTER_KEY"; then
+  MASTER_KEY="$(gen_key)"
+  env_set LITELLM_MASTER_KEY "$MASTER_KEY"
+  ok "replaced the publicly known example master key with a fresh one"
 else
   ok "reusing existing master key"
 fi

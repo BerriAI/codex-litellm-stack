@@ -64,6 +64,21 @@ gen_key() {
   printf 'sk-%s' "$(LC_ALL=C tr -dc 'a-zA-Z0-9' </dev/urandom | head -c 40)"
 }
 
+# litellm refuses this digest at boot too (PUBLICLY_KNOWN_MASTER_KEY_SHA256_DIGESTS)
+PUBLIC_EXAMPLE_MASTER_KEY_SHA256="88dc28d0f030c55ed4ab77ed8faf098196cb1c05df778539800c9f1243fe6b4b"
+
+sha256_hex() {
+  if command -v sha256sum >/dev/null 2>&1; then
+    printf '%s' "$1" | sha256sum | cut -d' ' -f1
+  else
+    printf '%s' "$1" | shasum -a 256 | cut -d' ' -f1
+  fi
+}
+
+is_public_example_master_key() {
+  [[ "$(sha256_hex "$1")" == "$PUBLIC_EXAMPLE_MASTER_KEY_SHA256" ]]
+}
+
 gateway_url() {
   local port; port="$(env_get LITELLM_PORT)"
   printf 'http://localhost:%s' "${port:-4000}"
